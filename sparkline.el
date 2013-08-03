@@ -4,7 +4,7 @@
 
 ;; Author: Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;; Created: July 2013
-;; Version: 0.1
+;; Version: 0.2.1
 ;; Keywords: extensions
 
 
@@ -38,18 +38,18 @@
 
 (defun sparkline-image-data (image)
   "Return the underlying bool-vector containing the bitmap data of IMAGE."
-  (getf (cdr image) :data))
+  (plist-get (cdr image) :data))
 
 (defun sparkline-image-index (image x y)
   "Return the index in the bitmap vector of IMAGE for location (X Y).
 Returns nil if the coordinates are outside the image."
-  (let ((width (getf (cdr image) :width))
-	(height (getf (cdr image) :height)))
+  (let ((width (plist-get (cdr image) :width))
+	(height (plist-get (cdr image) :height)))
     (when (and (>= x 0)
 	       (>= y 0)
 	       (> width x)
 	       (> height y))
-      (+ x (* (getf (cdr image) :width) y)))))
+      (+ x (* (plist-get (cdr image) :width) y)))))
 
 (defun sparkline-set-pixel (image x y value)
   "Set the pixel in IMAGE at location (X Y) to VALUE.
@@ -218,8 +218,8 @@ nil or t."
 
 (defun sparkline-make-sparkline (width height data)
   "Create a bitmap of size WIDTH x HEIGHT containing a sparkline chart of DATA."
-  (let* ((min (reduce 'min data))
-	(max (reduce 'max data))
+  (let* ((min (apply 'min data))
+	(max (apply 'max data))
 	(length (length data))
 	(index 0)
 	(image (sparkline-make-image width height (when (= min max) "gray")))
