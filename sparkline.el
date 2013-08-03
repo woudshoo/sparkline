@@ -4,7 +4,7 @@
 
 ;; Author: Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;; Created: July 2013
-;; Version: 0.2.1
+;; Version: 0.3.0
 ;; Keywords: extensions
 
 
@@ -228,7 +228,7 @@ nil or t."
       (decf min)
       (incf max))
     (dolist (value data)
-      (let ((x (/ (* width index) length))
+      (let ((x (/ (* (- width 1) index) (- length 1)))
 	    (y (floor (/ (* (- height 1) (- max value)) (- max min)))))
 	(when (and prev-x prev-y)
 	  (sparkline-draw-line image prev-x prev-y x y t))
