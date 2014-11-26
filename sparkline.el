@@ -1,10 +1,10 @@
 ;;; sparkline.el --- Make sparkline images from a list of numbers
 
-;; Copyright (C) 2013 Willem Rein Oudshoorn
+;; Copyright (C) 2013, 2014 Willem Rein Oudshoorn
 
 ;; Author: Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;; Created: July 2013
-;; Version: 0.3.0
+;; Version: 1.0.1
 ;; Keywords: extensions
 
 
@@ -18,22 +18,35 @@
 ;; Sparkline graphs were introduced by Edward Tufte see
 ;; http://en.wikipedia.org/wiki/Sparkline
 ;; 
-;; They are charts containing a single line without any labels or indication
-;; of scale.
+;; They are charts containing a single line without any labels or
+;; indication of scale.
 ;;
-;; They are meant to be used inline in text, without changing the line height and
-;; provide a quick overview of the trend and pattern of the underlying data.
+;; They are meant to be used inline in text, without changing the line
+;; height and provide a quick overview of the trend and pattern of the
+;; underlying data.
 ;;
 ;; Creating sparkline graphs is done for example by
 ;;
 ;;   (sparkline-make-sparkline 80 11 '(10 20 4 23.3 22.1 3.3 4.5 6.7))
 ;;
-;; which creates in image which can be inserted in a buffer with the standard
-;; image functions such as:
+;; which creates in image which can be inserted in a buffer with the
+;; standard image functions such as:
 ;;
-;;   (insert-image   (sparkline-make-sparkline 80 11 '(10 20 4 23.3 22.1 3.3 4.5 6.7)))
+;;   (insert-image
+;;      (sparkline-make-sparkline 80 11 '(10 20 4 23.3 22.1 3.3 4.5 6.7)))
 ;;
 ;;
+;; GENERAL DRAWING FEATURES
+;;
+;; Besides creating sparklines this package also allows creating and
+;; drawing into bitmaps in a limited way.
+;;
+;; The supported features are:
+;;
+;; - Creating a monochrome bitmap of arbitrary size with `sparkline-make-image'
+;; - Coloring a pixel in the foreground or backaground color with `sparkline-set-pixel'
+;; - Drawing straight lines with `sparkline-draw-line'.
+;; 
 ;;; Code:
 
 (defun sparkline-image-data (image)
@@ -95,17 +108,17 @@ the colors for the foreground (t) and background (nil) pixels."
 ;;;
 ;;;
 ;;;
-;;;                     |   /               |
-;;;                 \ 6 | 7/                |
-;;;                  \  | /                 | y increasing
-;;;               5   \ |/   8		    |
-;;;           ----------+---------	    |
-;;;               4    /|\   1		    |
-;;;                   / | \		    |
-;;;                  /  |  \		    |
-;;;                 / 3 | 2		    v
+;;;                 \   |   /           |
+;;;                  \6 | 7/            |
+;;;                   \ | /             | y increasing
+;;;               5    \|/   8          |
+;;;           ----------+---------      |
+;;;               4    /|\   1          |
+;;;                   / | \             |
+;;;                  /  |  \            |
+;;;                 / 3 | 2 \           v
 ;;;
-;;;     ------ x increasing --------->
+;;;       ------ x increasing --------->
 ;;;
 
 (defun sparkline-draw-case (dx dy)
@@ -140,6 +153,8 @@ If the vector is on a quadrant boundary it is undefined which quadrant is return
 	 (< (- dx) (- dy))) :6)
    (t (error "SHOULD NOT HAPPEN, IMPOSSIBLE OCTANT"))))
 
+
+
 (defun sparkline-transformed-coordinates (x0 y0 x1 y1 octant)
   "Helper function for `sparkline-draw-line'.
 This transforms the coordinates for (X0 Y0) (X1 Y1) in such a way that the
@@ -168,12 +183,13 @@ before drawing the pixel."
 
 (defun sparkline-draw-pixel-case (image x y value octant)
   "Helper function for `sparkline-draw-line'.
-Draws in IMAGE at location X Y a point with VALUE.  However
-X and Y are not used directly but transformed into another octant depending on
-OCTANT.  This inverts the transformation used in `sparkline-transformed-coordinates'.
+Draws in IMAGE at location X Y a point with VALUE.  However X and
+Y are not used directly but transformed into another octant
+depending on OCTANT.  This inverts the transformation used in
+`sparkline-transformed-coordinates'.
 
-The parameter OCTANT indicates the transformation.  It will transform a point in
-octant 1 to the octant OCTANT."
+The parameter OCTANT indicates the transformation.  It will
+transform a point in octant 1 to the octant OCTANT."
   (cond
    ((eq octant :1) (sparkline-set-pixel image x y value))
    ((eq octant :2) (sparkline-set-pixel image y x value))
