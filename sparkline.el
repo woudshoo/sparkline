@@ -49,11 +49,11 @@
 ;; 
 ;;; Code:
 
-(defun sparkline-image-data (image)
+(defun sparkline--image-data (image)
   "Return the underlying bool-vector containing the bitmap data of IMAGE."
   (plist-get (cdr image) :data))
 
-(defun sparkline-image-index (image x y)
+(defun sparkline--image-index (image x y)
   "Return the index in the bitmap vector of IMAGE for location (X Y).
 Returns nil if the coordinates are outside the image."
   (let ((width (plist-get (cdr image) :width))
@@ -73,9 +73,9 @@ This updates the image in place.
 
 Note that if the coordinates are outside the image the image is
 not updated and no error is throw."
-  (let ((index (sparkline-image-index image x y)))
+  (let ((index (sparkline--image-index image x y)))
     (when index
-      (aset (sparkline-image-data image) index value))))
+      (aset (sparkline--image-data image) index value))))
 
 
 (defun sparkline-make-image (width height &optional foreground background)
@@ -121,7 +121,7 @@ the colors for the foreground (t) and background (nil) pixels."
 ;;;       ------ x increasing --------->
 ;;;
 
-(defun sparkline-draw-case (dx dy)
+(defun sparkline--draw-case (dx dy)
   "Return the quadrant for the directional vector (DX DY).
 The return value is one of :1, ..., :8.
 
@@ -155,7 +155,7 @@ If the vector is on a quadrant boundary it is undefined which quadrant is return
 
 
 
-(defun sparkline-transformed-coordinates (x0 y0 x1 y1 octant)
+(defun sparkline--transformed-coordinates (x0 y0 x1 y1 octant)
   "Helper function for `sparkline-draw-line'.
 This transforms the coordinates for (X0 Y0) (X1 Y1) in such a way that the
 resulting directional vector is in quadrant :1 if the original
@@ -169,7 +169,7 @@ the total increase in x.
 For example the Bresenham line drawing algorithm needs this.
 
 To be able to draw the points afterwards in the correct location,
-use `sparkline-draw-pixel-case' which will undo the transformation
+use `sparkline--draw-pixel-case' which will undo the transformation
 before drawing the pixel."
   (cond
    ((eq octant :1) (list x0 y0 x1 y1))
@@ -181,12 +181,12 @@ before drawing the pixel."
    ((eq octant :7) (list (- y0) x0 (- y1) x1))
    ((eq octant :8) (list x0 (- y0) x1 (- y1)))))
 
-(defun sparkline-draw-pixel-case (image x y value octant)
+(defun sparkline--draw-pixel-case (image x y value octant)
   "Helper function for `sparkline-draw-line'.
 Draws in IMAGE at location X Y a point with VALUE.  However X and
 Y are not used directly but transformed into another octant
 depending on OCTANT.  This inverts the transformation used in
-`sparkline-transformed-coordinates'.
+`sparkline--transformed-coordinates'.
 
 The parameter OCTANT indicates the transformation.  It will
 transform a point in octant 1 to the octant OCTANT."
@@ -207,8 +207,8 @@ transform a point in octant 1 to the octant OCTANT."
   "Draw a line in the IMAGE from (X0 Y0) to (X1 Y1).
 The color of the line is indicated by VALUE which should be either
 nil or t."
-  (let* ((octant (sparkline-draw-case (- x1 x0) (- y1 y0)))
-		 (transformed (sparkline-transformed-coordinates x0 y0 x1 y1 octant))
+  (let* ((octant (sparkline--draw-case (- x1 x0) (- y1 y0)))
+		 (transformed (sparkline--transformed-coordinates x0 y0 x1 y1 octant))
 		 (x0* (nth 0 transformed))
 		 (y0* (nth 1 transformed))
 		 (x1* (nth 2 transformed))
@@ -216,17 +216,17 @@ nil or t."
     (let* ((dx (- x1* x0*))
 		   (dy (- y1* y0*))
 		   (D (- (* 2 dy) dx)))
-      (sparkline-draw-pixel-case image x0* y0* value octant)
+      (sparkline--draw-pixel-case image x0* y0* value octant)
       (while (and
 			  (incf x0*)
 			  (<= x0* x1*))
 		(if (> D 0)
 			(progn
 			  (incf y0*)
-			  (sparkline-draw-pixel-case image x0* y0* value octant)
+			  (sparkline--draw-pixel-case image x0* y0* value octant)
 			  (incf D (- (* 2 dy) (* 2 dx))))
 		  (progn
-			(sparkline-draw-pixel-case image x0* y0* value octant)
+			(sparkline--draw-pixel-case image x0* y0* value octant)
 			(incf D (* 2 dy)))))))
   image)
 
