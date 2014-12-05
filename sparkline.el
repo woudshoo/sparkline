@@ -57,11 +57,11 @@
   "Return the index in the bitmap vector of IMAGE for location (X Y).
 Returns nil if the coordinates are outside the image."
   (let ((width (plist-get (cdr image) :width))
-	(height (plist-get (cdr image) :height)))
+		(height (plist-get (cdr image) :height)))
     (when (and (>= x 0)
-	       (>= y 0)
-	       (> width x)
-	       (> height y))
+			   (>= y 0)
+			   (> width x)
+			   (> height y))
       (+ x (* (plist-get (cdr image) :width) y)))))
 
 (defun sparkline-set-pixel (image x y value)
@@ -84,13 +84,13 @@ The optional `FOREGROUND' and `BACKGROUND' parameters indicate
 the colors for the foreground (t) and background (nil) pixels."
   (let ((data (make-bool-vector (* width height) nil)))
     `(image :type xbm
-	    :data
-	    ,data
-	    :height ,height
-	    :width ,width
-	    :foreground ,foreground
-	    :background ,background
-	    :ascent 100)))
+			:data
+			,data
+			:height ,height
+			:width ,width
+			:foreground ,foreground
+			:background ,background
+			:ascent 100)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -128,29 +128,29 @@ The return value is one of :1, ..., :8.
 If the vector is on a quadrant boundary it is undefined which quadrant is returned."
   (cond
    ((and (>= dx 0)
-	 (>= dy 0)
-	 (>= dx dy)) :1)
+		 (>= dy 0)
+		 (>= dx dy)) :1)
    ((and (>= dx 0)
-	 (>= dy 0)
-	 (< dx dy)) :2)
+		 (>= dy 0)
+		 (< dx dy)) :2)
    ((and (>= dx 0)
-	 (< dy 0)
-	 (>= dx (- dy))) :8)
+		 (< dy 0)
+		 (>= dx (- dy))) :8)
    ((and (>= dx 0)
-	 (< dy 0)
-	 (< dx (- dy))) :7)
+		 (< dy 0)
+		 (< dx (- dy))) :7)
    ((and (< dx 0)
-	 (>= dy 0)
-	 (>= (- dx) dy)) :4)
+		 (>= dy 0)
+		 (>= (- dx) dy)) :4)
    ((and (< dx 0)
-	 (>= dy 0)
-	 (< (- dx) dy)) :3)
+		 (>= dy 0)
+		 (< (- dx) dy)) :3)
    ((and (< dx 0)
-	 (< dy 0)
-	 (>= (- dx) (- dy))) :5)
+		 (< dy 0)
+		 (>= (- dx) (- dy))) :5)
    ((and (< dx 0)
-	 (< dy 0)
-	 (< (- dx) (- dy))) :6)
+		 (< dy 0)
+		 (< (- dx) (- dy))) :6)
    (t (error "SHOULD NOT HAPPEN, IMPOSSIBLE OCTANT"))))
 
 
@@ -208,26 +208,26 @@ transform a point in octant 1 to the octant OCTANT."
 The color of the line is indicated by VALUE which should be either
 nil or t."
   (let* ((octant (sparkline-draw-case (- x1 x0) (- y1 y0)))
-	 (transformed (sparkline-transformed-coordinates x0 y0 x1 y1 octant))
-	 (x0* (nth 0 transformed))
-	 (y0* (nth 1 transformed))
-	 (x1* (nth 2 transformed))
-	 (y1* (nth 3 transformed)))
+		 (transformed (sparkline-transformed-coordinates x0 y0 x1 y1 octant))
+		 (x0* (nth 0 transformed))
+		 (y0* (nth 1 transformed))
+		 (x1* (nth 2 transformed))
+		 (y1* (nth 3 transformed)))
     (let* ((dx (- x1* x0*))
-	   (dy (- y1* y0*))
-	   (D (- (* 2 dy) dx)))
+		   (dy (- y1* y0*))
+		   (D (- (* 2 dy) dx)))
       (sparkline-draw-pixel-case image x0* y0* value octant)
       (while (and
-	      (incf x0*)
-	      (<= x0* x1*))
-	(if (> D 0)
-	    (progn
-	      (incf y0*)
-	      (sparkline-draw-pixel-case image x0* y0* value octant)
-	      (incf D (- (* 2 dy) (* 2 dx))))
-	  (progn
-	    (sparkline-draw-pixel-case image x0* y0* value octant)
-	    (incf D (* 2 dy)))))))
+			  (incf x0*)
+			  (<= x0* x1*))
+		(if (> D 0)
+			(progn
+			  (incf y0*)
+			  (sparkline-draw-pixel-case image x0* y0* value octant)
+			  (incf D (- (* 2 dy) (* 2 dx))))
+		  (progn
+			(sparkline-draw-pixel-case image x0* y0* value octant)
+			(incf D (* 2 dy)))))))
   image)
 
 
@@ -235,22 +235,22 @@ nil or t."
 (defun sparkline-make-sparkline (width height data)
   "Create a bitmap of size WIDTH x HEIGHT containing a sparkline chart of DATA."
   (let* ((min (apply 'min data))
-	(max (apply 'max data))
-	(length (length data))
-	(index 0)
-	(image (sparkline-make-image width height (when (= min max) "gray")))
-	prev-x prev-y)
+		 (max (apply 'max data))
+		 (length (length data))
+		 (index 0)
+		 (image (sparkline-make-image width height (when (= min max) "gray")))
+		 prev-x prev-y)
     (when (= min max)
       (decf min)
       (incf max))
     (dolist (value data)
       (let ((x (/ (* (- width 1) index) (- length 1)))
-	    (y (floor (/ (* (- height 1) (- max value)) (- max min)))))
-	(when (and prev-x prev-y)
-	  (sparkline-draw-line image prev-x prev-y x y t))
-	(setq prev-x x)
-	(setq prev-y y)
-	(incf index)))
+			(y (floor (/ (* (- height 1) (- max value)) (- max min)))))
+		(when (and prev-x prev-y)
+		  (sparkline-draw-line image prev-x prev-y x y t))
+		(setq prev-x x)
+		(setq prev-y y)
+		(incf index)))
     image))
 
 
