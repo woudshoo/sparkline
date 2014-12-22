@@ -4,9 +4,9 @@
 
 ;; Author: Willem Rein Oudshoorn <woudshoo@xs4all.nl>
 ;; Created: July 2013
-;; Version: 1.0.1
+;; Version: 1.0.2
 ;; Keywords: extensions
-
+;; Package-Requires: ((cl-lib "0.3"))
 
 ;; This file is not part of GNU Emacs
 ;; Standard GPL v3 or higher license applies.
@@ -48,9 +48,10 @@
 ;; - Drawing straight lines with `sparkline-draw-line'.
 ;; 
 ;;; Code:
+(require 'cl-lib)
 
 (defun sparkline--image-data (image)
-  "Return the underlying bool-vector containing the bitmap data of IMAGE."
+  "Return the underlying `bool-vector' containing the bitmap data of IMAGE."
   (plist-get (cdr image) :data))
 
 (defun sparkline--image-index (image x y)
@@ -218,16 +219,16 @@ nil or t."
 		   (D (- (* 2 dy) dx)))
       (sparkline--draw-pixel-case image x0* y0* value octant)
       (while (and
-			  (incf x0*)
+			  (cl-incf x0*)
 			  (<= x0* x1*))
 		(if (> D 0)
 			(progn
-			  (incf y0*)
+			  (cl-incf y0*)
 			  (sparkline--draw-pixel-case image x0* y0* value octant)
-			  (incf D (- (* 2 dy) (* 2 dx))))
+			  (cl-incf D (- (* 2 dy) (* 2 dx))))
 		  (progn
 			(sparkline--draw-pixel-case image x0* y0* value octant)
-			(incf D (* 2 dy)))))))
+			(cl-incf D (* 2 dy)))))))
   image)
 
 
@@ -241,8 +242,8 @@ nil or t."
 		 (image (sparkline-make-image width height (when (= min max) "gray")))
 		 prev-x prev-y)
     (when (= min max)
-      (decf min)
-      (incf max))
+      (cl-decf min)
+      (cl-incf max))
     (dolist (value data)
       (let ((x (/ (* (- width 1) index) (- length 1)))
 			(y (floor (/ (* (- height 1) (- max value)) (- max min)))))
@@ -250,7 +251,7 @@ nil or t."
 		  (sparkline-draw-line image prev-x prev-y x y t))
 		(setq prev-x x)
 		(setq prev-y y)
-		(incf index)))
+		(cl-incf index)))
     image))
 
 
